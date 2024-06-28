@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "916540432777",
+    "project_id": "ultimatechat-51396",
+    "storage_bucket": "ultimatechat-51396.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916540432777:android:a3bd6b30bbf7b8208e4158",
+        "android_client_info": {
+          "package_name": "project.ultimatechat"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBi45QXRXmYHBtWHMl53t9K_nN-As3KDpI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
