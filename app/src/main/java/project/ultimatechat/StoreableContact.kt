@@ -7,7 +7,7 @@ class StoreableContact: SendableContact {
     constructor(id: Int,
                 nickName: String,
                 dataOfRegistration: Long,
-                pathToProfilePicture: URL,
+                pathToProfilePicture: String,
                 lastActivityTime: Long): super(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime){}
     public fun addMessage(message: StoreableMessage){
         messages.add(message)

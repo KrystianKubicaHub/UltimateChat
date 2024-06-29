@@ -28,11 +28,13 @@ class MainActivity : ComponentActivity() {
                 val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
                 val myRef = database.getReference("message")
                 Log.e("ó", myRef.toString())
-                TestDB.execute()
+                TestDB.execute(applicationContext){ newMessage ->
+                    message = newMessage
+                }
 
                 myRef.setValue("Hello, World!")
                     .addOnSuccessListener {
-                        message = "Zapis do bazy danych się udał!"
+                        //message = "Zapis do bazy danych się udał!"
                     }
                     .addOnFailureListener { error ->
                         message = "Błąd zapisu: ${error.message}"
