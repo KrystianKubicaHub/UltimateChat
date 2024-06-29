@@ -28,6 +28,7 @@ class MainActivity : ComponentActivity() {
                 val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
                 val myRef = database.getReference("message")
                 Log.e("ó", myRef.toString())
+                TestDB.execute()
 
                 myRef.setValue("Hello, World!")
                     .addOnSuccessListener {
