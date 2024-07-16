@@ -21,6 +21,39 @@ class LocalUser: SendableContact {
         this.context = context
         loadAllContactsFromSQL(context)
     }
+    fun addContact(contact: StoreableContact){
+        if (contacts.none { it.id == contact.id }) {
+            contacts.add(contact)
+
+            // Otwórz bazę danych w trybie zapisu
+            val dbHelper = ContactsDatabaseHelper(context, this.id.toString())
+            val db = dbHelper.writableDatabase
+
+            // Utwórz wartości dla nowego kontaktu
+            val values = ContentValues().apply {
+                put("id", contact.id)
+                put("nickName", contact.nickName)
+                put("dataOfRegistration", contact.dateOfRegistration)
+                put("pathToProfilePicture", contact.pathToProfilePicture)
+                put("lastActivityTime", contact.lastActivityTime)
+            }
+
+            val newRowId = db.insert("contacts", null, values)
+
+            // Zamknij bazę danych
+            db.close()
+
+            // Informacyjny log i toast
+            if (newRowId != -1L) {
+                Log.i("LocalUser", "Contact added to database with ID: $newRowId")
+                Toast.makeText(context, "Contact added to database", Toast.LENGTH_SHORT).show()
+            } else {
+                Log.e("LocalUser", "Error adding contact to database")
+                Toast.makeText(context, "Error adding contact to database", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
 
     private fun loadAllContactsFromSQL(context: Context){
         val dbHelper = ContactsDatabaseHelper(context, this.id.toString())
@@ -52,7 +85,7 @@ class LocalUser: SendableContact {
         val path = this.pathToProfilePicture
         val currentNumberOfMessages = this.currentNumberOfMessages
     }
-    public fun sendMessage(message: String, receiverId: Int) {
+    fun sendMessage(message: String, receiverId: Int) {
         val newMessageForFirebase = SendableMessage(MyTime.getTime(), message, this.id, 0)
         val newMessageForSQL = StoreableMessage(newMessageForFirebase, true)
 
@@ -62,21 +95,20 @@ class LocalUser: SendableContact {
         val cursor = db.query(
             "contacts", null, "id = ?", arrayOf(receiverId.toString()), null, null, null
         )
-        if (cursor.moveToFirst()) {
-            val contactIndex = contacts.indexOfFirst { it.id == receiverId }
-            if (contactIndex != -1) {
-                contacts[contactIndex].addMessage(newMessageForSQL)
-            } else {
+        val contactIndex = contacts.indexOfFirst { it.id == receiverId }
 
-                val nickName = cursor.getString(cursor.getColumnIndexOrThrow("nickName"))
-                val dataOfRegistration = cursor.getLong(cursor.getColumnIndexOrThrow("dataOfRegistration"))
-                val pathToProfilePicture = cursor.getString(cursor.getColumnIndexOrThrow("pathToProfilePicture"))
-                val lastActivityTime = cursor.getLong(cursor.getColumnIndexOrThrow("lastActivityTime"))
 
-                val newContact = StoreableContact(receiverId, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
-                newContact.addMessage(newMessageForSQL)
-                contacts.add(newContact)
-            }
+        if (cursor.moveToFirst()){
+            Toast.makeText(context, "First condition is true", Toast.LENGTH_LONG).show()
+            val nickName = cursor.getString(cursor.getColumnIndexOrThrow("nickName"))
+            val dataOfRegistration = cursor.getLong(cursor.getColumnIndexOrThrow("dataOfRegistration"))
+            val pathToProfilePicture = cursor.getString(cursor.getColumnIndexOrThrow("pathToProfilePicture"))
+            val lastActivityTime = cursor.getLong(cursor.getColumnIndexOrThrow("lastActivityTime"))
+
+            val newContact = StoreableContact(receiverId, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
+            newContact.addMessage(newMessageForSQL)
+            contacts.add(newContact)
+
 
             val values = ContentValues().apply {
                 put("sendTime", newMessageForSQL.sendTime)
@@ -86,6 +118,8 @@ class LocalUser: SendableContact {
                 put("belongToLocalUser", if (newMessageForSQL.GetBelongToLocalUser()) 1 else 0)
             }
             db.insert("messages", null, values)
+        }else{
+            Toast.makeText(context, "First condition is false", Toast.LENGTH_LONG).show()
         }
         cursor.close()
         db.close()
