@@ -20,8 +20,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             val emptyMutableList = remember {mutableStateOf(listOf<StoreableMessage>())}
             logInTheUser(emptyMutableList)
-            ChatScreen(localUser.temporaryListOfMessages)
-            //MainScreen()
+            //ChatScreen(localUser.temporaryListOfMessages)
+            MainScreen()
         }
 
     }

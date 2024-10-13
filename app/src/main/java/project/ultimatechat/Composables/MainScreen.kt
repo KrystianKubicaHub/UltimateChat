@@ -2,6 +2,7 @@ package project.ultimatechat.Composables
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,24 +15,32 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import project.ultimatechat.entities.StoreableContact
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun MainScreen() {
-    // Sample data for messages
+    val keyboardController = LocalSoftwareKeyboardController.current
+    var searchQuery by remember { mutableStateOf("") }
     val messages = listOf(
-        Message("Stephanie Pimentel", "Lorem ipsum dolor, sit amet...", "2 min ago"),
-        Message("Kenneth Tyson", "Lorem ipsum dolor, sit amet...", "3h ago"),
-        Message("Fatima Bernard", "Lorem ipsum dolor, sit amet...", "1d ago"),
-        Message("Bruce Morrow", "Lorem ipsum dolor, sit amet...", "5m ago"),
-        Message("Donez Lauba", "Lorem ipsum dolor, sit amet...", "2h ago")
+        StoreableContact(2,"Agnieszka", System.currentTimeMillis(),
+            "", System.currentTimeMillis())
     )
 
     Column(
@@ -39,7 +48,12 @@ fun MainScreen() {
             .fillMaxSize()
             .background(Color.White)
             .padding(16.dp)
-    ) {
+            .clickable(
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() },
+                onClick = {  keyboardController?.hide()}
+            )
+    ){
         Text(
             text = "Messages",
             fontSize = 24.sp,
@@ -47,16 +61,33 @@ fun MainScreen() {
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        LazyColumn {
+        SearchBar(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            onQueryChange = { query ->
+                searchQuery = query // Update the query as user types
+                println("Searching for: $query") // Handle search action here
+            },
+            query = searchQuery
+        )
+
+        LazyColumn(modifier = Modifier.clickable(
+            onClick = {
+                // Hide the keyboard on click
+                keyboardController?.hide()
+            },
+            indication = null, // Disable the ripple effect
+            interactionSource = remember { MutableInteractionSource() }
+        )) {
             items(messages) { message ->
-                MessageItem(message)
+                ChatRow(message)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MessageItem(message: Message) {
+fun ChatRow(person: StoreableContact) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,7 +95,6 @@ fun MessageItem(message: Message) {
             .clickable { /* Handle click event */ },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Placeholder for the profile image
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -77,19 +107,19 @@ fun MessageItem(message: Message) {
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = message.sender,
+                text = person.nickName!!,
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp
             )
             Text(
-                text = message.preview,
+                text = if(person.noMessages()) "No messages Yet" else person.getLastMessage(),
                 fontSize = 14.sp,
                 color = Color.Gray
             )
         }
 
         Text(
-            text = message.timestamp,
+            text = person.getLastActivity(),
             fontSize = 12.sp,
             color = Color.Gray
         )

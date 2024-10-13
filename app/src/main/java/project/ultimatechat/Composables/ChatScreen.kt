@@ -100,7 +100,8 @@ fun ChatScreen(temporaryListOfMessages: MutableState<List<StoreableMessage>>) {
             Button(
                 onClick = {
                     if (message.text.isNotEmpty()) {
-                        val newMessage = StoreableMessage(System.currentTimeMillis(), message.text,2,0, true)
+                        val newMessage =
+                            StoreableMessage(System.currentTimeMillis(), message.text, 2, 0, true)
                         temporaryListOfMessages.value = temporaryListOfMessages.value + newMessage
                         message = TextFieldValue("")
                     }
