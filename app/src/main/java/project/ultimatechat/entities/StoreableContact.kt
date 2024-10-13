@@ -1,6 +1,4 @@
-package project.ultimatechat
-
-import java.net.URL
+package project.ultimatechat.entities
 
 class StoreableContact: SendableContact {
     private var messages: MutableList<StoreableMessage> = mutableListOf()

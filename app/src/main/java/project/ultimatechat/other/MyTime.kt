@@ -1,4 +1,4 @@
-package project.ultimatechat
+package project.ultimatechat.other
 
 class MyTime {
     companion object{

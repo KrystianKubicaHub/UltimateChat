@@ -1,4 +1,4 @@
-package project.ultimatechat
+package project.ultimatechat.SQL
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

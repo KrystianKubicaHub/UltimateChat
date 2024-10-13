@@ -1,4 +1,4 @@
-package project.ultimatechat
+package project.ultimatechat.entities
 
 import java.net.URL
 

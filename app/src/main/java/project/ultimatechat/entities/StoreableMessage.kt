@@ -1,9 +1,9 @@
-package project.ultimatechat
+package project.ultimatechat.entities
 
 import kotlin.properties.Delegates
 
 class StoreableMessage: SendableMessage {
-    private var belongToLocalUser by Delegates.notNull<Boolean>();
+    public var belongToLocalUser by Delegates.notNull<Boolean>()
     constructor(sendTime: Long,
                 message: String,
                 senderId: Int,
