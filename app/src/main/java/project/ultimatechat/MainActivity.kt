@@ -1,5 +1,7 @@
 package project.ultimatechat
 
+import DateOfBirth
+import EnterPassword
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -32,6 +34,8 @@ class MainActivity : ComponentActivity() {
                 composable("mainScreen") { MainScreen(navController) }
                 composable("enterNickName") { EnterNickName(navController) }
                 composable("insertPhoto") { InsertPhoto(navController) }
+                composable("enterPassword") { EnterPassword(navController) }
+                composable("dateOfBirth") { DateOfBirth(navController) }
             }
         }
     }

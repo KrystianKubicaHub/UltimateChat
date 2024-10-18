@@ -1,4 +1,4 @@
 package project.ultimatechat.Composables.LoginAndRegistration
 
-class DataOfBirth {
+class ContactData {
 }

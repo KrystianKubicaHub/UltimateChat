@@ -141,7 +141,7 @@ fun InsertPhoto(navController: NavHostController) {
 
         // Button to proceed
         Button(
-            onClick = { /* Add action to proceed */ },
+            onClick = { navController.navigate("dateOfBirth") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
@@ -154,7 +154,7 @@ fun InsertPhoto(navController: NavHostController) {
 
         // Skip Button
         OutlinedButton(
-            onClick = { /* Add action to skip */ },
+            onClick = { navController.navigate("dateOfBirth") },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp),
