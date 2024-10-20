@@ -63,6 +63,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("com.google.firebase:firebase-database:21.0.0")
     implementation("androidx.navigation:navigation-compose:2.8.2")
+    implementation("com.google.firebase:firebase-auth-ktx:23.0.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

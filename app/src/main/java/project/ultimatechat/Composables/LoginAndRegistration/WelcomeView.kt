@@ -1,5 +1,6 @@
 package project.ultimatechat.Composables.LoginAndRegistration
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,12 +19,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.ultimatechat.R
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import project.ultimatechat.AuthServices
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WelcomeView(navController: NavHostController) {
     val focusManager = LocalFocusManager.current
+    val emailOrPhone = remember{mutableStateOf("")}
+    val password = remember{mutableStateOf("")}
+    val errorInfo = remember{mutableStateOf("")}
 
     Box(
         modifier = Modifier
@@ -61,13 +68,17 @@ fun WelcomeView(navController: NavHostController) {
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = emailOrPhone.value,
+                onValueChange = { v -> emailOrPhone.value = v},
                 label = { Text("E-mail or Id", color = Color.White) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White,
-                    disabledTextColor = Color.White
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.5f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -80,13 +91,17 @@ fun WelcomeView(navController: NavHostController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = "",
-                onValueChange = {},
+                value = password.value,
+                onValueChange = { v -> password.value = v},
                 label = { Text("Password", color = Color.White) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedLabelColor = Color.White,
+                    unfocusedLabelColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White,
-                    disabledTextColor = Color.White
+                    cursorColor = Color.White,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White.copy(alpha = 0.5f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -106,13 +121,31 @@ fun WelcomeView(navController: NavHostController) {
             Spacer(modifier = Modifier.height(32.dp))
 
             Button(
-                onClick = { focusManager.clearFocus() },
+                onClick = {
+                    focusManager.clearFocus()
+                    if((emailOrPhone.value != "") && (password.value != "")){
+                        AuthServices.logIn(emailOrPhone.value, password.value) { bolion, eroCode ->
+                            if (!bolion) {
+                                errorInfo.value = eroCode!!
+                            } else {
+                                navController.navigate("mainScreen")
+                            }
+
+                        }
+                    }
+
+
+
+                },
                 colors = ButtonDefaults.buttonColors(Color(0xFF007FFF)),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
                 Text("Sign in", color = Color.White, fontSize = 16.sp)
+            }
+            if(errorInfo.value != ""){
+                Text(errorInfo.value, color = Color.Red, fontSize = 16.sp, modifier = Modifier.padding(all = 5.dp))
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -127,7 +160,7 @@ fun WelcomeView(navController: NavHostController) {
 
             ClickableText(
                 text = AnnotatedString("Sign up"),
-                onClick = { navController.navigate("enterNickName") },
+                onClick = { navController.navigate("register") },
                 style = LocalTextStyle.current.copy(color = Color(0xFF007FFF))
             )
 

@@ -1,31 +1,37 @@
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
-import project.ultimatechat.R
+import project.ultimatechat.Composables.LoginAndRegistration.ContinueButton
 
 @Composable
-fun EnterPassword(navController: NavHostController) {
-    // State to hold the password and its visibility
+fun EnterPassword() {
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
 
-    // UI
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,24 +39,7 @@ fun EnterPassword(navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Placeholder for an image (like a lock icon) in the center
-        Box(
-            modifier = Modifier
-                .size(150.dp)
-                .background(Color.LightGray, shape = CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.search), // Placeholder for lock image
-                contentDescription = "Lock Icon",
-                modifier = Modifier.size(100.dp),
-                contentScale = ContentScale.Fit
-            )
-        }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Password TextField
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
