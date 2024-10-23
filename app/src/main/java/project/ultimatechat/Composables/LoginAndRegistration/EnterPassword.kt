@@ -1,10 +1,8 @@
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Visibility
@@ -14,7 +12,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableIntState
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import project.ultimatechat.Composables.LoginAndRegistration.ContinueButton
 
 @Composable
-fun EnterPassword() {
-    var password by remember { mutableStateOf("") }
+fun EnterPassword(typedPassword: MutableState<String>) {
     var passwordVisible by remember { mutableStateOf(false) }
 
     Column(
@@ -41,8 +37,8 @@ fun EnterPassword() {
     ) {
 
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
+            value = typedPassword.value,
+            onValueChange = { typedPassword.value = it },
             label = { Text("Password") },
             placeholder = { Text("Enter your password") },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),

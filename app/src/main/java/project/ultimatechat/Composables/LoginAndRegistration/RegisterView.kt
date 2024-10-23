@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
 import project.ultimatechat.R
+import java.util.Calendar
 
 @Composable
 fun RegisterView(navController: NavHostController) {
@@ -48,9 +49,19 @@ fun RegisterView(navController: NavHostController) {
     val TITLE = remember {mutableStateOf("Enter your nickname")}
     val SUBTITLE = remember { mutableStateOf("Nickname might be your name and last name, but i doesn't have to") }
     val IMAGE = remember { mutableIntStateOf(R.drawable.enter_nick_name) }
-    val SELECTED_IMAGE = remember{ mutableStateOf("") }
     val selectedImageBitmap = remember { mutableStateOf<Bitmap?>(null) }
     val context = LocalContext.current
+
+
+    val typedNickname = remember{mutableStateOf("")}
+    val selectedDateOfBirth = remember {mutableStateOf(Calendar.getInstance())}
+    val userHasSelectedEmail = remember {mutableStateOf(false)}
+    val typedEmail = remember {mutableStateOf("")}
+    val typedPhoneNumber = remember {mutableStateOf("")}
+    val typedPassword = remember {mutableStateOf("")}
+
+
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -75,7 +86,8 @@ fun RegisterView(navController: NavHostController) {
         }
         Column(
             modifier = Modifier
-                .fillMaxWidth().padding(horizontal = 35.dp),
+                .fillMaxWidth()
+                .padding(horizontal = 35.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -96,7 +108,8 @@ fun RegisterView(navController: NavHostController) {
                     .padding(top = 5.dp)
             )
             val imageModifier = Modifier
-                .size(250.dp).padding(top = 25.dp)
+                .size(250.dp)
+                .padding(top = 25.dp)
             if ((selectedImageBitmap.value != null) && VIEW_OPTION.intValue == 2){
                 Image(
                     bitmap = selectedImageBitmap.value!!.asImageBitmap(),
@@ -111,13 +124,12 @@ fun RegisterView(navController: NavHostController) {
                 )
             }
         }
-
         Box(modifier = Modifier
             .align(Alignment.TopStart)
             .padding(top = 400.dp, start = 25.dp, end = 25.dp)){
-            when(VIEW_OPTION.intValue) {
+            when(VIEW_OPTION.intValue){
                 1 -> {
-                    EnterNickName()
+                    EnterNickName(typedNickname)
                     TITLE.value = "Enter your username"
                     SUBTITLE.value = "Choose a unique username"
                     IMAGE.intValue = R.drawable.enter_nick_name
@@ -129,34 +141,47 @@ fun RegisterView(navController: NavHostController) {
                     IMAGE.intValue = R.drawable.add_photo
                 }
                 3 -> {
-                    DateOfBirth()
+                    DateOfBirth(selectedDateOfBirth)
                     TITLE.value = "Enter your date of birth"
                     SUBTITLE.value = "Pick your birth date"
                     IMAGE.intValue = R.drawable.birthday
                 }
                 4 -> {
-                    EnterEmailOrPhoneNumber()
+                    EnterEmailOrPhoneNumber(userHasSelectedEmail, typedEmail, typedPhoneNumber)
                     TITLE.value = "Enter your email address or phone number"
                     SUBTITLE.value = "This will be used for verification"
                     IMAGE.intValue = R.drawable.enter_nick_name
                 }
                 5 -> {
-                    EnterPassword()
+                    EnterPassword(typedPassword)
                     TITLE.value = "Enter your password"
                     SUBTITLE.value = "Create a strong password"
                     IMAGE.intValue = R.drawable.enter_nick_name
                 }
                 6 -> {
-                    AuthServices.createUserWithEmail("krykubi@wp.pl","12345678") { bb, it ->
-                        if(!bb){
-                            Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
-                        }else{
-                            Toast.makeText(context, "Udało siem", Toast.LENGTH_LONG).show()
-                            navController.navigate("mainScreen")
+                    if(userHasSelectedEmail.value){
+                        AuthServices.createUserWithEmail(typedEmail.value, typedPassword.value) { bb, it ->
+                            if(!bb){
+                                Toast.makeText(context, it.toString(), Toast.LENGTH_LONG).show()
+                            }else{
+                                AuthServices.updateUserName(typedNickname.value) {
+                                    AuthServices.initializeUserInDB(
+                                        context, typedNickname.value
+                                    )
+                                }
 
+
+                                if(selectedImageBitmap.value != null){
+                                    AuthServices.updateUserPicture(selectedImageBitmap.value!!,
+                                        {
+                                            Toast.makeText(context, "Udało siem", Toast.LENGTH_LONG).show()
+                                            navController.navigate("mainScreen")
+                                        },
+                                        {e -> Toast.makeText(context, e.toString(), Toast.LENGTH_LONG).show()})
+                                }
+                            }
                         }
                     }
-
                 }
             }
         }
@@ -166,7 +191,7 @@ fun RegisterView(navController: NavHostController) {
           .fillMaxWidth()
           .align(Alignment.BottomCenter)
           .padding(bottom = 30.dp)){
-          if(VIEW_OPTION.intValue == 2) {
+          if(VIEW_OPTION.intValue == 2){
               OutlinedButton(
                   onClick = {VIEW_OPTION.intValue++},
                   modifier = Modifier
@@ -179,12 +204,32 @@ fun RegisterView(navController: NavHostController) {
               }
               Spacer(modifier = Modifier.height(16.dp))
           }
-          ContinueButton(VIEW_OPTION = VIEW_OPTION)
+          if(VIEW_OPTION.intValue != 3){
+              ContinueButton(VIEW_OPTION = VIEW_OPTION)
+          }else{
+              if(isUserAtLeast18YearsOld(selectedDateOfBirth.value)) {
+                  ContinueButton(VIEW_OPTION = VIEW_OPTION)
+              } else {
+                  val errorMessage = remember { mutableStateOf("You MUST BE AT LEAST 18") }
+                  DisabledContinueButton(errorMessage)
+              }
+          }
+
+
       }
     }
-}
 
-fun createUsersAccountWithEmailOrPhoneNumber() {
 
 }
 
+
+
+fun isUserAtLeast18YearsOld(selectedDateOfBirth: Calendar): Boolean {
+    val calendar = Calendar.getInstance().apply {
+        add(Calendar.YEAR, -18)
+    }
+    val minimumAllowedDate = calendar.timeInMillis
+
+
+    return selectedDateOfBirth.timeInMillis <= minimumAllowedDate
+}

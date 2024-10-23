@@ -1,6 +1,7 @@
 package project.ultimatechat.Composables.LoginAndRegistration
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,11 @@ import project.ultimatechat.R
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
 
@@ -179,10 +185,22 @@ fun WelcomeView(navController: NavHostController) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                Icon(painter = painterResource(id = R.drawable.search), contentDescription = null, tint = Color.White)
-                Icon(painter = painterResource(id = R.drawable.search), contentDescription = null, tint = Color.White)
-                Icon(painter = painterResource(id = R.drawable.search), contentDescription = null, tint = Color.White)
-                Icon(painter = painterResource(id = R.drawable.search), contentDescription = null, tint = Color.White)
+                val iconSize = 45.dp
+                Image(
+                    painter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.google)),
+                    contentDescription = "Google Icon",
+                    modifier = Modifier.size(iconSize),
+                )
+                Image(
+                    painter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.facebook)),
+                    contentDescription = "Google Icon",
+                    modifier = Modifier.size(iconSize),
+                )
+                Image(
+                    painter = rememberVectorPainter(image = ImageVector.vectorResource(id = R.drawable.twitter)),
+                    contentDescription = "Google Icon",
+                    modifier = Modifier.size(iconSize),
+                )
             }
         }
     }
