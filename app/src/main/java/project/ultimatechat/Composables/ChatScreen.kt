@@ -38,12 +38,15 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import project.ultimatechat.R
 import project.ultimatechat.entities.StoreableMessage
+import project.ultimatechat.entities.UserLibEntity
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ChatScreen(temporaryListOfMessages: MutableState<List<StoreableMessage>>) {
+fun ChatScreen(navControler : NavController, userSimple: UserLibEntity = UserLibEntity("-1", "EXAMPLE")) {
+    val temporaryListOfMessages: MutableState<List<StoreableMessage>> 
     var message by remember { mutableStateOf(TextFieldValue("")) }
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -52,6 +55,7 @@ fun ChatScreen(temporaryListOfMessages: MutableState<List<StoreableMessage>>) {
             .fillMaxSize()
             .background(Color(0xFFF0F0F0))
     ) {
+        //Text(text = userSimple.name)
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -66,10 +70,16 @@ fun ChatScreen(temporaryListOfMessages: MutableState<List<StoreableMessage>>) {
                 ),
             reverseLayout = true
         ) {
+
+
+            /*
             items(temporaryListOfMessages.value.reversed()) { msg ->
                 MessageBubble(msg)
             }
+            
+             */
         }
+        Text(text = userSimple.name)
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -102,7 +112,7 @@ fun ChatScreen(temporaryListOfMessages: MutableState<List<StoreableMessage>>) {
                     if (message.text.isNotEmpty()) {
                         val newMessage =
                             StoreableMessage(System.currentTimeMillis(), message.text, 2, 0, true)
-                        temporaryListOfMessages.value = temporaryListOfMessages.value + newMessage
+                        //temporaryListOfMessages.value = temporaryListOfMessages.value + newMessage
                         message = TextFieldValue("")
                     }
                 },

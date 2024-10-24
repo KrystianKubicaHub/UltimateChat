@@ -16,6 +16,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import project.ultimatechat.entities.SendableContact
+
+
 
 @Composable
 fun ContinueButton(VIEW_OPTION: MutableIntState){

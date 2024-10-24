@@ -18,13 +18,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,14 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
+import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import project.ultimatechat.entities.StoreableContact
 
 
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val filteredUsers by viewModel.filteredUsers.collectAsState(emptyList())
+    val context = LocalContext.current
+
     val keyboardController = LocalSoftwareKeyboardController.current
-    var searchQuery by remember { mutableStateOf("") }
     val messages = listOf(
         StoreableContact(2,"Agnieszka", System.currentTimeMillis(),
             "", System.currentTimeMillis())
@@ -63,7 +68,8 @@ fun MainScreen(navController: NavHostController) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(all = 16.dp)
+                    .padding(all = 16.dp),
+                color = Color(0xFFFF5722)
             )
             Image(
                 painter = painterResource(id = R.drawable.log_out),
@@ -79,14 +85,29 @@ fun MainScreen(navController: NavHostController) {
         }
 
 
-        SearchBar(
-            modifier = Modifier.padding(horizontal = 16.dp),
+        MySearchBar(
+            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
             onQueryChange = { query ->
-                searchQuery = query
-                println("Searching for: $query")
+                viewModel.updateSearchQuery(query, context)
             },
             query = searchQuery
         )
+        if (filteredUsers.isNotEmpty()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+            ) {
+                items(filteredUsers) { user ->
+                    SearchItem(user, navController)
+                }
+            }
+        } else if(searchQuery != "") {
+            Text(
+                text = "No users found",
+                modifier = Modifier.padding(16.dp)
+            )
+        }
 
         LazyColumn(modifier = Modifier.clickable(
             onClick = {
