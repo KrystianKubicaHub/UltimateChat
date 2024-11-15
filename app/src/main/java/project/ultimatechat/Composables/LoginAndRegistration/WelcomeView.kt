@@ -22,22 +22,22 @@ import project.ultimatechat.R
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
+import project.ultimatechat.MainViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun WelcomeView(navController: NavHostController) {
+fun WelcomeView(navController: NavHostController, viewModel: MainViewModel) {
     val focusManager = LocalFocusManager.current
     val emailOrPhone = remember{mutableStateOf("")}
     val password = remember{mutableStateOf("")}
     val errorInfo = remember{mutableStateOf("")}
-
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()

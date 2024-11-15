@@ -1,32 +1,25 @@
 package project.ultimatechat.entities
 
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class StoreableContact: SendableContact {
-    private var messages: MutableList<StoreableMessage> = mutableListOf()
-    constructor(id: Int,
-                nickName: String,
-                dataOfRegistration: Long,
-                pathToProfilePicture: String,
-                lastActivityTime: Long): super(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
+class StoreableContact(
+    id: String,
+    nickName: String,
+    dataOfRegistration: Long,
+    pathToProfilePicture: String,
+    lastActivityTime: Long
+) : SendableContact(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime) {
+    val messages = MutableStateFlow<List<StoreableMessage>>(emptyList())
 
-    constructor(id: Int,
-                nickName: String,
-                dataOfRegistration: Long,
-                pathToProfilePicture: String,
-                lastActivityTime: Long,
-                messages: MutableList<StoreableMessage>): super(
-        id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime){
-                    this.messages = messages
-                }
 
     public fun addMessage(message: StoreableMessage){
-        messages.add(message)
+        messages.value = messages.value + message
     }
     public fun noMessages(): Boolean{
-        if(messages.size == 0){
+        if(messages.value.size == 0){
             return true
         }else{
             return false
@@ -34,11 +27,11 @@ class StoreableContact: SendableContact {
     }
 
     override fun toString(): String {
-        return "StoreableContact(messages=${messages.size})"
+        return "StoreableContact(messages=${messages.value.size})"
     }
 
     fun getLastMessage(): String {
-        return messages.last().message
+        return messages.value.last().message
     }
 
     fun getLastActivity(): String {

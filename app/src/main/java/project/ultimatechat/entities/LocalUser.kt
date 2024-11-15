@@ -11,6 +11,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.flow.MutableStateFlow
 import project.ultimatechat.SQL.ContactsDatabaseHelper
 import project.ultimatechat.other.MyTime
 
@@ -18,17 +19,17 @@ import project.ultimatechat.other.MyTime
 class LocalUser: SendableContact {
     private val contacts : MutableList<StoreableContact> = mutableListOf()
     private var currentNumberOfMessages = 0
-    private var context : Context
+    private lateinit var context : Context
     public lateinit var temporaryListOfMessages : MutableState<List<StoreableMessage>>
 
     constructor(
-        id: Int,
+        id: String,
         nickName: String,
         dataOfRegistration: Long,
         pathToProfilePicture: String,
         lastActivityTime: Long,
         context: Context,
-        emptyMutableMessageList : MutableState<List<StoreableMessage>>
+        emptyMutableMessageList: MutableState<List<StoreableMessage>>
     ) : super(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime){
         this.context = context
         loadAllContactsFromSQL(context)
@@ -36,6 +37,14 @@ class LocalUser: SendableContact {
 
         temporaryListOfMessages = emptyMutableMessageList
         getMessagesFromFB(currentNumberOfMessages + 1)
+    }
+    constructor(
+        id: String,
+        nickName: String,
+        dataOfRegistration: Long,
+        pathToProfilePicture: String,
+        lastActivityTime: Long,
+    ) : super(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime){
     }
 
     private fun loadAllMessagesFromSQL(context: Context) {
@@ -75,7 +84,6 @@ class LocalUser: SendableContact {
         }
     }
 
-
     private fun loadAllContactsFromSQL(context: Context){
         val dbHelper = ContactsDatabaseHelper(context, this.id.toString())
         val db = dbHelper.readableDatabase
@@ -91,7 +99,7 @@ class LocalUser: SendableContact {
                 val pathToProfilePicture = cursor.getString(cursor.getColumnIndexOrThrow("pathToProfilePicture"))
                 val lastActivityTime = cursor.getLong(cursor.getColumnIndexOrThrow("lastActivityTime"))
 
-                val contact = StoreableContact(id, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
+                val contact = StoreableContact(id.toString(), nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
                 contactsList.add(contact)
             } while (cursor.moveToNext())
         }
@@ -107,10 +115,10 @@ class LocalUser: SendableContact {
         val currentNumberOfMessages = this.currentNumberOfMessages
     }
 
-    fun sendMessageSecondApproach(message: String, receiverId: Int) {
+    fun sendMessageSecondApproach(message: String, receiverId: String) {
         val wrappedMessage = SendableMessage(MyTime.getTime(), message, this.id, 0)
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
-        val foreignUserPath = database.getReference("messages").child(receiverId.toString())
+        val foreignUserPath = database.getReference("messages").child(receiverId)
         val indexPath = foreignUserPath.child("index")
 
         val valueEventListener = object : ValueEventListener {
@@ -156,7 +164,7 @@ class LocalUser: SendableContact {
 
     private fun getMessagesFromFB(index: Int) {
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
-        val myRef = database.getReference("messages").child(this.id.toString()).child(index.toString())
+        val myRef = database.getReference("messages").child(this.id).child(index.toString())
 
         myRef.addValueEventListener(object : ValueEventListener {
 
@@ -164,7 +172,7 @@ class LocalUser: SendableContact {
                 val v = snapshot.value.toString().removeSurrounding("{","}")
                 val ele = v.split(",")
 
-                var senderID = -1
+                var senderID = "-1"
                 var message = ""
                 var timeOfRecived : Long= -1L
                 var sendTime : Long = -1L
@@ -181,7 +189,7 @@ class LocalUser: SendableContact {
 
                     Log.e("PPP", keyAndValue.first().toString())
                     if(key == "SENDERID"){
-                        senderID = value.toInt()
+                        senderID = value
                     }else if(key == "MESSAGE"){
                         message = value
                     }else if(key == "SENDTIME"){
@@ -195,7 +203,7 @@ class LocalUser: SendableContact {
                     }
                 }
                 //Toast.makeText(context, recievedMessage.toString(), Toast.LENGTH_LONG).show()
-                if(sendTime != -1L && message != "" && senderID != -1 && timeOfRecived != -1L){
+                if(sendTime != -1L && message != "" && senderID != "-1" && timeOfRecived != -1L){
                     val recievedMessage = StoreableMessage(sendTime, message, senderID, timeOfRecived, false)
                     currentNumberOfMessages++
                     temporaryListOfMessages.value = temporaryListOfMessages.value + recievedMessage
@@ -236,7 +244,7 @@ class LocalUser: SendableContact {
             val pathToProfilePicture = cursor.getString(cursor.getColumnIndexOrThrow("pathToProfilePicture"))
             val lastActivityTime = cursor.getLong(cursor.getColumnIndexOrThrow("lastActivityTime"))
 
-            val newContact = StoreableContact(receiverId, nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
+            val newContact = StoreableContact(receiverId.toString(), nickName, dataOfRegistration, pathToProfilePicture, lastActivityTime)
             newContact.addMessage(newMessageForSQL)
             contacts.add(newContact)
 

@@ -4,8 +4,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +22,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,52 +39,86 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
 import project.ultimatechat.entities.StoreableMessage
-import project.ultimatechat.entities.UserLibEntity
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @Composable
-fun ChatScreen(navControler : NavController, userSimple: UserLibEntity = UserLibEntity("-1", "EXAMPLE")) {
+fun ChatScreen(navControler: NavController, viewModel: MainViewModel) {
     val temporaryListOfMessages: MutableState<List<StoreableMessage>> 
     var message by remember { mutableStateOf(TextFieldValue("")) }
     val keyboardController = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F0F0))
+            .background(Color(0xFF3F51B5))
+            .clickable(
+                onClick = {
+                    viewModel.giveMessageInfo(context)
+                    keyboardController?.hide()
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+    )
     ) {
-        //Text(text = userSimple.name)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .background(Color(0xFFFF5722))
+        ) {
+            IconButton(
+                onClick = { navControler.navigate("mainScreen") },
+                modifier = Modifier
+                    .padding(start = 10.dp)
+                    .align(Alignment.CenterStart)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.back),
+                    contentDescription = "Back",
+                    tint = Color(0xFFF0F0F0)
+                )
+            }
+
+            Text(
+                text = viewModel.currentChatMate.collectAsState().value.name,
+                color = Color.White,
+                fontSize = 20.sp,
+                modifier = Modifier.align(Alignment.Center),
+                textAlign = TextAlign.Center
+            )
+        }
+
+
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
                 .padding(8.dp)
                 .clickable(
                     onClick = {
-                        // Hide the keyboard on click
                         keyboardController?.hide()
                     },
-                    indication = null, // Disable the ripple effect
+                    indication = null,
                     interactionSource = remember { MutableInteractionSource() }
                 ),
             reverseLayout = true
         ) {
 
-
-            /*
-            items(temporaryListOfMessages.value.reversed()) { msg ->
+            items(viewModel.messages.value.reversed()) { msg ->
                 MessageBubble(msg)
             }
-            
-             */
         }
-        Text(text = userSimple.name)
         Row(
             modifier = Modifier
                 .padding(8.dp)
@@ -109,10 +148,8 @@ fun ChatScreen(navControler : NavController, userSimple: UserLibEntity = UserLib
             )
             Button(
                 onClick = {
-                    if (message.text.isNotEmpty()) {
-                        val newMessage =
-                            StoreableMessage(System.currentTimeMillis(), message.text, 2, 0, true)
-                        //temporaryListOfMessages.value = temporaryListOfMessages.value + newMessage
+                    if (message.text.isNotEmpty()){
+                        viewModel.sendMessage(message = message.text)
                         message = TextFieldValue("")
                     }
                 },

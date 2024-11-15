@@ -34,7 +34,6 @@ import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
 import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
-import androidx.lifecycle.viewmodel.compose.viewModel
 import project.ultimatechat.entities.StoreableContact
 
 
@@ -46,7 +45,7 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val messages = listOf(
-        StoreableContact(2,"Agnieszka", System.currentTimeMillis(),
+        StoreableContact(2.toString(),"Agnieszka", System.currentTimeMillis(),
             "", System.currentTimeMillis())
     )
 
@@ -68,7 +67,10 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .align(Alignment.CenterStart)
-                    .padding(all = 16.dp),
+                    .padding(all = 16.dp)
+                    .clickable {
+                        viewModel.Toast(context)
+                    },
                 color = Color(0xFFFF5722)
             )
             Image(
@@ -99,7 +101,7 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
                     .padding(horizontal = 16.dp)
             ) {
                 items(filteredUsers) { user ->
-                    SearchItem(user, navController)
+                    SearchItem(user, navController, viewModel)
                 }
             }
         } else if(searchQuery != "") {

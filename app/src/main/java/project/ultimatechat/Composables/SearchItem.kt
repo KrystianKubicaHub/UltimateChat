@@ -18,19 +18,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import project.ultimatechat.MainViewModel
 import project.ultimatechat.R // Upewnij się, że masz obraz profilowy w resources
 import project.ultimatechat.entities.UserLibEntity
 
 @Composable
-fun SearchItem(user: UserLibEntity, navMenager:NavController) {
+fun SearchItem(user: UserLibEntity, navMenager: NavController, viewModel: MainViewModel) {
     Box(
-
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 2.dp, vertical = 2.dp)
             .background(Color(0xFFD4FAFF), shape = RoundedCornerShape(12.dp))
             .padding(8.dp)
-            .clickable { navMenager.navigate("chat") }
+            .clickable {
+                navMenager.navigate("chat")
+                viewModel.setCurrentChatMate(user)
+            }
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -45,9 +48,8 @@ fun SearchItem(user: UserLibEntity, navMenager:NavController) {
                 contentScale = ContentScale.Crop
             )
 
-            Spacer(modifier = Modifier.width(16.dp)) // Odstęp między zdjęciem a tekstem
+            Spacer(modifier = Modifier.width(16.dp))
 
-            // Nazwa użytkownika
             Text(
                 text = user.name,
                 fontSize = 18.sp, // Większa czcionka

@@ -14,6 +14,7 @@ import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.FirebaseStorage
+import project.ultimatechat.entities.SendableContact
 import java.io.ByteArrayOutputStream
 import java.util.concurrent.TimeUnit
 
@@ -21,12 +22,13 @@ object AuthServices {
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
-    fun checkIfUserLoggedIn(): Boolean{
-        return auth.currentUser != null
-    }
+
 
     private val storage = FirebaseStorage.getInstance()
     private val storageReference = storage.reference
+    fun checkIfUserLoggedIn(): Boolean{
+        return auth.currentUser != null
+    }
 
     fun updateUserPicture(bitmap: Bitmap, onSuccess: () -> Unit, onFailure: (Exception) -> Unit) {
         val currentUser = auth.currentUser
@@ -85,9 +87,14 @@ object AuthServices {
     }
     fun initializeUserInDB(context: Context, userName: String){
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
-        val myRef = database.getReference("usersRoster").child(auth.currentUser!!.uid)
+        val refForUsersRoster = database.getReference("usersRoster").child(auth.currentUser!!.uid)
+        val refForUsersList = database.getReference("usersList").child(auth.currentUser!!.uid)
+        val id = auth.currentUser!!.uid
 
-        myRef.setValue(userName)
+        val sendableContact = SendableContact(id, userName, System.currentTimeMillis(), "", System.currentTimeMillis())
+
+        refForUsersRoster.setValue(userName)
+        refForUsersList.setValue(sendableContact)
     }
     fun test(context: Context){
         Toast.makeText(context,  auth.currentUser!!.displayName, Toast.LENGTH_LONG).show()

@@ -39,11 +39,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
+import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
 import java.util.Calendar
 
 @Composable
-fun RegisterView(navController: NavHostController) {
+fun RegisterView(navController: NavHostController, viewModel: MainViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val VIEW_OPTION = remember{ mutableIntStateOf(1) }
     val TITLE = remember {mutableStateOf("Enter your nickname")}
