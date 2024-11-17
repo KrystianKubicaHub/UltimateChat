@@ -3,8 +3,8 @@ package project.ultimatechat
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -17,9 +17,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import project.ultimatechat.entities.LocalUser
 import project.ultimatechat.entities.SendableContact
+import project.ultimatechat.entities.SendableMessage
 import project.ultimatechat.entities.StoreableContact
 import project.ultimatechat.entities.StoreableMessage
 import project.ultimatechat.entities.UserLibEntity
+import project.ultimatechat.other.MyTime
 
 class MainViewModel : ViewModel() {
 
@@ -28,8 +30,6 @@ class MainViewModel : ViewModel() {
     private val _users = MutableStateFlow<List<StoreableContact>>(emptyList())
     val users: StateFlow<List<StoreableContact>> = _users
 
-    private val _messages = MutableStateFlow<List<StoreableMessage>>(emptyList())
-    val messages: StateFlow<List<StoreableMessage>> = _messages
 
     private val currentUser = Firebase.auth.currentUser
     private lateinit var localUser: LocalUser
@@ -39,8 +39,12 @@ class MainViewModel : ViewModel() {
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> get() = _searchQuery
 
-    private val _currentChatMate = MutableStateFlow(UserLibEntity("-1", "Example"))
-    val currentChatMate: StateFlow<UserLibEntity> get() = _currentChatMate
+    private val _currentChatMate = MutableStateFlow(StoreableContact("-1",
+        "Example707",
+        0L,
+        "",
+        0L))
+    val currentChatMate: StateFlow<StoreableContact> get() = _currentChatMate
 
     val filteredUsers = _searchQuery.map { query ->
         _usersLibrary.value.filter { user ->
@@ -66,20 +70,28 @@ class MainViewModel : ViewModel() {
             )
         }
     }
-
-    fun setCurrentChatMate(user: UserLibEntity){
+    fun setCurrentChatMate(user: StoreableContact){
         _currentChatMate.value = user
+    }
+
+    fun setCurrentChatMate(userLibEntity: UserLibEntity, function: () -> Unit){
+        val user = findUserById(userLibEntity.uid)
+        if(user != null){
+            _currentChatMate.value = user
+        }else{
+            getUserById(userLibEntity.uid) {
+                if (it == null) {
+                    textToToast = "Brak kompatyfilności wstecznej, użytkownik o tym id nie ma w bazie danych swojej reprezentacji"
+                }else{
+                    _currentChatMate.value = it
+                    function.invoke()
+                }
+            }
+        }
+
     }
     fun updateSearchQuery(query: String, context: Context) {
         _searchQuery.value = query
-    }
-    fun giveMessageInfo(context: Context){
-        if(messages.value.isNullOrEmpty()){
-            Toast.makeText(context, "messages.value.size", Toast.LENGTH_LONG).show()
-        }else{
-            Toast.makeText(context, messages.value.size.toString(), Toast.LENGTH_LONG).show()
-        }
-
     }
 
 
@@ -101,6 +113,7 @@ class MainViewModel : ViewModel() {
                 var message = ""
                 var timeOfReceived: Long = -1L
                 var sendTime: Long = -1L
+                var receiverID: String = ""
 
                 for (element in elements) {
                     val keyAndValue = element.split("=")
@@ -112,21 +125,38 @@ class MainViewModel : ViewModel() {
                         "MESSAGE" -> message = value
                         "SENDTIME" -> sendTime = value.toLongOrNull() ?: -1L
                         "TIMEOFRECEIVED" -> timeOfReceived = value.toLongOrNull() ?: -1L
+                        "RECEIVERID" -> receiverID = value
                     }
                 }
 
                 if (sendTime != -1L && message.isNotEmpty() && senderID != "-1" && timeOfReceived != -1L) {
-                    val receivedMessage = StoreableMessage(sendTime, message, senderID, timeOfReceived, false)
-                    val user = findUserById(senderID)
-                    if(user == null){
-                        getUserById(senderID) {
-                            it?.addMessage(receivedMessage) ?: run {
-                                Log.e("MainViewModel", "User not found: unable to add message.")
+                    val belongToLocalUser = if(senderID == localUser.id) true else false
+                    val receivedMessage = StoreableMessage(sendTime, message, senderID, timeOfReceived, belongToLocalUser, receiverID)
+
+                    if(belongToLocalUser){
+                        val user = findUserById(receiverID)
+                        if(user == null){
+                            getUserById(receiverID) {
+                                it?.addMessage(receivedMessage) ?: run {
+                                    Log.e("MainViewModel", "User not found: unable to add message.")
+                                }
                             }
+                        }else{
+                            user.addMessage(receivedMessage)
                         }
                     }else{
-                        user.addMessage(receivedMessage)
+                        val user = findUserById(senderID)
+                        if(user == null){
+                            getUserById(senderID) {
+                                it?.addMessage(receivedMessage) ?: run {
+                                    Log.e("MainViewModel", "User not found: unable to add message.")
+                                }
+                            }
+                        }else{
+                            user.addMessage(receivedMessage)
+                        }
                     }
+
 
                 }
 
@@ -143,7 +173,7 @@ class MainViewModel : ViewModel() {
     }
 
     fun Toast(context: Context, len: Int = Toast.LENGTH_LONG){
-        textToToast = _users.value.toString()
+        textToToast = users.value.toString()
         Toast.makeText(context, textToToast, len).show()
     }
 
@@ -161,7 +191,7 @@ class MainViewModel : ViewModel() {
                         nickName = sendableContact.nickName!!,
                         dataOfRegistration = sendableContact.dateOfRegistration!!,
                         pathToProfilePicture = sendableContact.pathToProfilePicture!!,
-                        lastActivityTime = sendableContact.lastActivityTime!!
+                        lastActivityTime = sendableContact.lastActivityTime!!,
                     )
                     _users.value = _users.value + storeableContact
                     onUserFetched(storeableContact)
@@ -179,7 +209,9 @@ class MainViewModel : ViewModel() {
 
 
     fun sendMessage(message: String){
-        localUser.sendMessageSecondApproach(message, currentChatMate.value.uid)
+        val wrappedMessage = SendableMessage(MyTime.getTime(), message, localUser.id, 0, currentChatMate.value.id)
+        localUser.sendMessageSecondApproach(wrappedMessage, currentChatMate.value.id)
+        localUser.sendMessageSecondApproach(wrappedMessage, localUser.id)
     }
 
     private fun fetchUsersLibrary() {
@@ -214,5 +246,6 @@ class MainViewModel : ViewModel() {
         }
         return _users.value.find { it.id == userId }
     }
+
 
 }

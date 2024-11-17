@@ -1,25 +1,17 @@
 package project.ultimatechat
 
-import android.content.Context
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import project.ultimatechat.Composables.ChatScreen
-import project.ultimatechat.Composables.LoginAndRegistration.RegisterView
-import project.ultimatechat.Composables.LoginAndRegistration.WelcomeView
-import project.ultimatechat.Composables.MainScreen
-import project.ultimatechat.entities.LocalUser
-import project.ultimatechat.entities.SendableContact
-import project.ultimatechat.entities.StoreableMessage
+import project.ultimatechat.Composables.Views.ChatScreen
+import project.ultimatechat.Composables.Views.RegisterView
+import project.ultimatechat.Composables.Views.WelcomeView
+import project.ultimatechat.Composables.Views.MainScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

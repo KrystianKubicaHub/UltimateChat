@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables
+package project.ultimatechat.Composables.fragments
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -31,8 +31,7 @@ fun SearchItem(user: UserLibEntity, navMenager: NavController, viewModel: MainVi
             .background(Color(0xFFD4FAFF), shape = RoundedCornerShape(12.dp))
             .padding(8.dp)
             .clickable {
-                navMenager.navigate("chat")
-                viewModel.setCurrentChatMate(user)
+                viewModel.setCurrentChatMate(user, { navMenager.navigate("chat")})
             }
     ) {
         Row(
@@ -52,10 +51,10 @@ fun SearchItem(user: UserLibEntity, navMenager: NavController, viewModel: MainVi
 
             Text(
                 text = user.name,
-                fontSize = 18.sp, // Większa czcionka
-                fontWeight = FontWeight.Medium, // Pogrubiona
-                overflow = TextOverflow.Ellipsis, // Jeśli tekst jest zbyt długi, obetnij
-                maxLines = 1 // Ograniczenie do jednej linii
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium,
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1
             )
         }
     }

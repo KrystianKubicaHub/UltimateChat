@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables.LoginAndRegistration
+package project.ultimatechat.Composables.Views
 
 import android.widget.Toast
 import androidx.compose.foundation.Image

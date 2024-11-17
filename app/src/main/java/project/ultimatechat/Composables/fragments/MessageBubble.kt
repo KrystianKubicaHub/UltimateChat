@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables
+package project.ultimatechat.Composables.fragments
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

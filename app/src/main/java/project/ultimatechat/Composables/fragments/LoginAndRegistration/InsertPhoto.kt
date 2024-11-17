@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables.LoginAndRegistration
+package project.ultimatechat.Composables.fragments.LoginAndRegistration
 
 import android.graphics.Bitmap
 import android.graphics.ImageDecoder

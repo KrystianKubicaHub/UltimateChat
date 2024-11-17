@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables
+package project.ultimatechat.Composables.Views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -7,7 +7,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,14 +27,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -47,14 +44,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import project.ultimatechat.Composables.fragments.MessageBubble
 import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
-import project.ultimatechat.entities.StoreableMessage
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(navControler: NavController, viewModel: MainViewModel) {
-    val temporaryListOfMessages: MutableState<List<StoreableMessage>> 
+    val currentChatMate by viewModel.currentChatMate.collectAsState()
+    val messagesOfTheUser by currentChatMate.messages.collectAsState(initial = emptyList())
+
+
     var message by remember { mutableStateOf(TextFieldValue("")) }
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
@@ -65,12 +65,11 @@ fun ChatScreen(navControler: NavController, viewModel: MainViewModel) {
             .background(Color(0xFF3F51B5))
             .clickable(
                 onClick = {
-                    viewModel.giveMessageInfo(context)
                     keyboardController?.hide()
                 },
                 indication = null,
                 interactionSource = remember { MutableInteractionSource() }
-    )
+            )
     ) {
         Box(
             modifier = Modifier
@@ -91,13 +90,19 @@ fun ChatScreen(navControler: NavController, viewModel: MainViewModel) {
                 )
             }
 
-            Text(
-                text = viewModel.currentChatMate.collectAsState().value.name,
-                color = Color.White,
-                fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.Center),
-                textAlign = TextAlign.Center
-            )
+            currentChatMate.nickName?.let {
+                Text(
+                    text = it,
+                    color = Color.White,
+                    fontSize = 20.sp,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .clickable {
+                            viewModel.Toast(context)
+                        },
+                    textAlign = TextAlign.Center
+                )
+            }
         }
 
 
@@ -114,8 +119,7 @@ fun ChatScreen(navControler: NavController, viewModel: MainViewModel) {
                 ),
             reverseLayout = true
         ) {
-
-            items(viewModel.messages.value.reversed()) { msg ->
+            items(messagesOfTheUser.reversed()) { msg ->
                 MessageBubble(msg)
             }
         }

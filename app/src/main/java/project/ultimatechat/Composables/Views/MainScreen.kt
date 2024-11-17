@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables
+package project.ultimatechat.Composables.Views
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
+import project.ultimatechat.Composables.fragments.MySearchBar
+import project.ultimatechat.Composables.fragments.SearchItem
 import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
 import project.ultimatechat.entities.StoreableContact
@@ -39,15 +41,14 @@ import project.ultimatechat.entities.StoreableContact
 
 @Composable
 fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
+
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filteredUsers by viewModel.filteredUsers.collectAsState(emptyList())
+
+    val users by viewModel.users.collectAsState()
     val context = LocalContext.current
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val messages = listOf(
-        StoreableContact(2.toString(),"Agnieszka", System.currentTimeMillis(),
-            "", System.currentTimeMillis())
-    )
 
     Column(
         modifier = Modifier
@@ -88,7 +89,9 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
 
 
         MySearchBar(
-            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
             onQueryChange = { query ->
                 viewModel.updateSearchQuery(query, context)
             },
@@ -118,20 +121,24 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
             indication = null,
             interactionSource = remember { MutableInteractionSource() }
         )) {
-            items(messages) { message ->
-                ChatRow(message)
+
+            items(users) { uUu ->
+                ChatRow(uUu, navController, viewModel)
             }
+
         }
     }
 }
 
 @Composable
-fun ChatRow(person: StoreableContact) {
+fun ChatRow(person: StoreableContact, navController: NavHostController, viewModel: MainViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { /* Handle click event */ },
+            .clickable {
+                navController.navigate("chat")
+                viewModel.setCurrentChatMate(person)},
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(

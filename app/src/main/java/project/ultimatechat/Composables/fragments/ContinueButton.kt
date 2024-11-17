@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables.LoginAndRegistration
+package project.ultimatechat.Composables.fragments
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +16,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import project.ultimatechat.entities.SendableContact
-
 
 
 @Composable

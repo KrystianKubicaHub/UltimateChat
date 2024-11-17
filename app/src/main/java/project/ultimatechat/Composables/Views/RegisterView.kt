@@ -1,4 +1,4 @@
-package project.ultimatechat.Composables.LoginAndRegistration
+package project.ultimatechat.Composables.Views
 
 import DateOfBirth
 import EnterPassword
@@ -39,6 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import project.ultimatechat.AuthServices
+import project.ultimatechat.Composables.fragments.ContinueButton
+import project.ultimatechat.Composables.fragments.DisabledContinueButton
+import project.ultimatechat.Composables.fragments.LoginAndRegistration.EnterEmailOrPhoneNumber
+import project.ultimatechat.Composables.fragments.LoginAndRegistration.EnterNickName
+import project.ultimatechat.Composables.fragments.LoginAndRegistration.InsertPhoto
 import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
 import java.util.Calendar

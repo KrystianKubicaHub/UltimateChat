@@ -1,23 +1,22 @@
 package project.ultimatechat.entities
 
-import kotlin.properties.Delegates
 
 class StoreableMessage: SendableMessage {
-    var belongToLocalUser by Delegates.notNull<Boolean>()
+    var belongToLocalUser = true
     constructor(sendTime: Long,
                 message: String,
                 senderId: String,
                 timeOfReceived: Long,
-                belongToLocalUser: Boolean) : super(sendTime, message, senderId, timeOfReceived){
+                belongToLocalUser: Boolean,
+                receiverId: String) : super(sendTime, message, senderId, timeOfReceived, receiverId){
                     this.belongToLocalUser = belongToLocalUser
                 }
-    constructor(sendableMessage: SendableMessage, belongToLocalUser: Boolean) : super(sendableMessage.sendTime,
-        sendableMessage.message, sendableMessage.senderId, sendableMessage.timeOfReceived){
-        this.belongToLocalUser = belongToLocalUser
+    constructor(sendableMessage: SendableMessage) : super(sendableMessage.sendTime,
+        sendableMessage.message, sendableMessage.senderId, sendableMessage.timeOfReceived, sendableMessage.receiverId){
     }
 
 
-    public fun GetBelongToLocalUser(): Boolean{
+    fun GetBelongToLocalUser(): Boolean{
         return  belongToLocalUser
     }
 }
