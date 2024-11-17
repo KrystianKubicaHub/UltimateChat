@@ -12,6 +12,7 @@ import project.ultimatechat.Composables.Views.ChatScreen
 import project.ultimatechat.Composables.Views.RegisterView
 import project.ultimatechat.Composables.Views.WelcomeView
 import project.ultimatechat.Composables.Views.MainScreen
+import project.ultimatechat.Composables.Views.Profile
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +30,7 @@ class MainActivity : ComponentActivity() {
                 composable("mainScreen") { MainScreen(navController, viewModel) }
                 composable("register") { RegisterView(navController, viewModel) }
                 composable("chat") { ChatScreen(navController, viewModel) }
+                composable("profile") { Profile(navController, viewModel) }
             }
         }
     }

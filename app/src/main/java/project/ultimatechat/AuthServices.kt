@@ -96,7 +96,7 @@ object AuthServices {
         refForUsersRoster.setValue(userName)
         refForUsersList.setValue(sendableContact)
     }
-    fun test(context: Context){
+    fun Toast(context: Context){
         Toast.makeText(context,  auth.currentUser!!.displayName, Toast.LENGTH_LONG).show()
     }
 
@@ -112,6 +112,7 @@ object AuthServices {
                 }
             }
     }
+
     fun updateUserName(newName: String, onSuccess: () -> Unit) {
         val user = auth.currentUser
 

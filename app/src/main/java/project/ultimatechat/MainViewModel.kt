@@ -5,6 +5,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -12,9 +13,13 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import project.ultimatechat.entities.LocalUser
 import project.ultimatechat.entities.SendableContact
 import project.ultimatechat.entities.SendableMessage
@@ -22,6 +27,7 @@ import project.ultimatechat.entities.StoreableContact
 import project.ultimatechat.entities.StoreableMessage
 import project.ultimatechat.entities.UserLibEntity
 import project.ultimatechat.other.MyTime
+import kotlin.coroutines.resume
 
 class MainViewModel : ViewModel() {
 
@@ -31,8 +37,10 @@ class MainViewModel : ViewModel() {
     val users: StateFlow<List<StoreableContact>> = _users
 
 
-    private val currentUser = Firebase.auth.currentUser
-    private lateinit var localUser: LocalUser
+    private val _currentUser = MutableStateFlow(Firebase.auth.currentUser)
+    val currentUser: StateFlow<FirebaseUser?> = _currentUser.asStateFlow()
+
+    lateinit var localUser: LocalUser
     private val _usersLibrary =  MutableStateFlow<MutableList<UserLibEntity>>(mutableListOf())
     val usersLibrary: StateFlow<MutableList<UserLibEntity>> get() = _usersLibrary
 
@@ -51,23 +59,42 @@ class MainViewModel : ViewModel() {
             user.name.contains(query, ignoreCase = true)
         }
     }
+    val verificationId = ""
     init{
-        if(currentUser != null){
-            setLocalUser()
-            fetchUsersLibrary()
-            fetchLocalUserMessages()
+        if(currentUser.value != null){
+            viewModelScope.launch {
+                startUpTasks()
+            }
+
         }
     }
 
-    private fun setLocalUser() {
-        if(currentUser != null){
-            localUser = LocalUser(
-                currentUser.uid,
-                currentUser.displayName.toString(),
-                0L,
-                "",
-                0L,
-            )
+    private suspend fun startUpTasks(){
+
+
+        val userHasBeenObtained = getLocalUser()
+        if(userHasBeenObtained){
+            fetchUsersRoster()
+            fetchLocalUserMessages()
+        }
+
+    }
+
+    private suspend fun getLocalUser() : Boolean{
+        return suspendCancellableCoroutine { continuation ->
+            if (currentUser.value != null) {
+                getUserById(currentUser.value!!.uid, false) {
+                    localUser = LocalUser(
+                        currentUser.value!!.uid,
+                        currentUser.value!!.displayName.toString(),
+                        it!!.dateOfRegistration!!,
+                        currentUser.value!!.photoUrl.toString(),
+                        it.lastActivityTime!!,
+                    )
+                    textToToast = it.dateOfBirth.toString()
+                    continuation.resume(value = true)
+                }
+            }
         }
     }
     fun setCurrentChatMate(user: StoreableContact){
@@ -90,7 +117,7 @@ class MainViewModel : ViewModel() {
         }
 
     }
-    fun updateSearchQuery(query: String, context: Context) {
+    fun updateSearchQuery(query: String) {
         _searchQuery.value = query
     }
 
@@ -101,7 +128,7 @@ class MainViewModel : ViewModel() {
     }
     private fun getMessagesFromFB(index: Int) {
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
-        val myRef = database.getReference("messages").child(currentUser!!.uid).child(index.toString())
+        val myRef = database.getReference("messages").child(currentUser.value!!.uid).child(index.toString())
 
         myRef.addValueEventListener(object : ValueEventListener {
 
@@ -177,7 +204,7 @@ class MainViewModel : ViewModel() {
         Toast.makeText(context, textToToast, len).show()
     }
 
-    fun getUserById(userId: String, onUserFetched: (StoreableContact?) -> Unit) {
+    fun getUserById(userId: String, addToContactList: Boolean = true, onUserFetched: (StoreableContact?) -> Unit) {
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
         val userRef = database.getReference("usersList").child(userId)
 
@@ -193,9 +220,15 @@ class MainViewModel : ViewModel() {
                         pathToProfilePicture = sendableContact.pathToProfilePicture!!,
                         lastActivityTime = sendableContact.lastActivityTime!!,
                     )
-                    _users.value = _users.value + storeableContact
-                    onUserFetched(storeableContact)
-                } else {
+                    if(addToContactList){
+                        _users.value = _users.value + storeableContact
+                        onUserFetched(storeableContact)
+                    }else{
+                        onUserFetched(storeableContact)
+                    }
+
+                }
+                else {
                     onUserFetched(null)
                 }
             } else {
@@ -214,7 +247,7 @@ class MainViewModel : ViewModel() {
         localUser.sendMessageSecondApproach(wrappedMessage, localUser.id)
     }
 
-    private fun fetchUsersLibrary() {
+    private fun fetchUsersRoster() {
         val database = Firebase.database("https://ultimatechat-51396-default-rtdb.europe-west1.firebasedatabase.app")
         val myRef = database.getReference("usersRoster")
 

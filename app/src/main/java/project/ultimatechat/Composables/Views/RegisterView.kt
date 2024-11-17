@@ -2,6 +2,7 @@ package project.ultimatechat.Composables.Views
 
 import DateOfBirth
 import EnterPassword
+import android.app.Activity
 import android.graphics.Bitmap
 import android.widget.Toast
 import androidx.compose.foundation.Image
@@ -38,6 +39,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.google.firebase.FirebaseException
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.PhoneAuthCredential
+import com.google.firebase.auth.PhoneAuthOptions
+import com.google.firebase.auth.PhoneAuthProvider
 import project.ultimatechat.AuthServices
 import project.ultimatechat.Composables.fragments.ContinueButton
 import project.ultimatechat.Composables.fragments.DisabledContinueButton
@@ -47,6 +53,7 @@ import project.ultimatechat.Composables.fragments.LoginAndRegistration.InsertPho
 import project.ultimatechat.MainViewModel
 import project.ultimatechat.R
 import java.util.Calendar
+import java.util.concurrent.TimeUnit
 
 @Composable
 fun RegisterView(navController: NavHostController, viewModel: MainViewModel) {
@@ -189,6 +196,7 @@ fun RegisterView(navController: NavHostController, viewModel: MainViewModel) {
                         }
                     }
                 }
+                7 -> {}
             }
         }
 

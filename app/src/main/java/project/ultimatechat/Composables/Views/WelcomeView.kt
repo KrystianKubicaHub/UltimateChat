@@ -20,8 +20,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import project.ultimatechat.R
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.platform.LocalContext
@@ -136,12 +138,8 @@ fun WelcomeView(navController: NavHostController, viewModel: MainViewModel) {
                             } else {
                                 navController.navigate("mainScreen")
                             }
-
                         }
                     }
-
-
-
                 },
                 colors = ButtonDefaults.buttonColors(Color(0xFF007FFF)),
                 modifier = Modifier
@@ -179,7 +177,15 @@ fun WelcomeView(navController: NavHostController, viewModel: MainViewModel) {
                 textAlign = TextAlign.Center
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+
+            Box(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .fillMaxWidth(0.7f)
+                    .height(3.dp)
+                    .clip(RoundedCornerShape(50))
+                    .background(Color.White)
+            )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

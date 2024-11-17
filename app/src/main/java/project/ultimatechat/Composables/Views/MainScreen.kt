@@ -23,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import project.ultimatechat.AuthServices
 import project.ultimatechat.Composables.fragments.MySearchBar
 import project.ultimatechat.Composables.fragments.SearchItem
@@ -44,6 +46,7 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
 
     val searchQuery by viewModel.searchQuery.collectAsState()
     val filteredUsers by viewModel.filteredUsers.collectAsState(emptyList())
+    val currentUser by viewModel.currentUser.collectAsState()
 
     val users by viewModel.users.collectAsState()
     val context = LocalContext.current
@@ -62,12 +65,22 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
             )
     ){
         Box(modifier = Modifier.fillMaxWidth()){
+
+            Image(
+                painter = rememberAsyncImagePainter(model = currentUser?.photoUrl),
+                contentDescription = "User Avatar",
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray, CircleShape)
+                    .clickable { navController.navigate("profile") }
+            )
             Text(
-                text = "Messages",
+                text = "Chats",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
-                    .align(Alignment.CenterStart)
+                    .align(Alignment.Center)
                     .padding(all = 16.dp)
                     .clickable {
                         viewModel.Toast(context)
@@ -93,11 +106,11 @@ fun MainScreen(navController: NavHostController, viewModel: MainViewModel) {
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth(),
             onQueryChange = { query ->
-                viewModel.updateSearchQuery(query, context)
+                viewModel.updateSearchQuery(query)
             },
             query = searchQuery
         )
-        if (filteredUsers.isNotEmpty()) {
+        if (filteredUsers.isNotEmpty() && searchQuery.isNotEmpty()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
